@@ -1,17 +1,199 @@
 package com.severyn.actidentifier;
 
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.TreeSet;
+import java.util.List;
 
-import org.apache.commons.math3.stat.descriptive.*;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
+import edu.emory.mathcs.jtransforms.fft.*;
 
 public final class FeatureExtractors {
 	public final static FeatureExtractors INSTANCE = new FeatureExtractors();
+	static float alpha = 0.10f;
 
 	private FeatureExtractors() {
 		// Exists only to defeat instantiation.
+	}
+
+	public static double[] fftest(ArrayList<Double> v) {
+		// ArrayList<Double> result = new ArrayList<>();
+		DoubleFFT_1D fftDo = new DoubleFFT_1D(v.size());
+
+		double[] fft = new double[v.size() * 2];
+
+		for (int i = 0; i < v.size(); i++) {
+			fft[i] = v.get(i);
+		}
+		fftDo.realForwardFull(fft);
+
+		double[] result = new double[v.size()];
+
+		double max = 0;
+
+		for (int i = 1; i < v.size(); i++) {
+			// System.out.println(Math.sqrt(fft[i]*fft[i]+fft[i+v.size()-1]*fft[i+v.size()-1]));
+			result[i - 1] = Math.sqrt(fft[i] * fft[i] + fft[i + v.size() - 1]
+					* fft[i + v.size() - 1]);
+			if (result[i - 1] > max)
+				max = result[i - 1];
+		}
+		// System.out.println(max);
+		return result;
+		// for (double d : fft) {
+		// result.add(d);
+		// }
+		// return result;
+	}
+
+	public static int[] calcHistogram(double[] data, double min, double max,
+			int numBins) {
+		final int[] result = new int[numBins];
+		final double binSize = (max - min) / numBins;
+
+		for (double d : data) {
+			int bin = (int) ((d - min) / binSize); // changed this from numBins
+			if (bin < 0) { /* this data is smaller than min */
+			} else if (bin >= numBins) { /* this data point is bigger than max */
+			} else {
+				result[bin] += 1;
+			}
+		}
+		return result;
+	}
+
+	public static int[] calcHistogram(ArrayList<Double> data, double min,
+			double max, int numBins) {
+		final int[] result = new int[numBins];
+		final double binSize = (max - min) / numBins;
+
+		for (double d : data) {
+			int bin = (int) ((d - min) / binSize); // changed this from numBins
+			if (bin < 0) { /* this data is smaller than min */
+			} else if (bin >= numBins) { /* this data point is bigger than max */
+			} else {
+				result[bin] += 1;
+			}
+		}
+		return result;
+	}
+
+	public static int zeroCrossingCount(ArrayList<Double> data2) {
+		float spread = 0.30f;
+		int rate = 8;
+
+		int count = 0;
+
+		double max = Collections.max(data2);
+		double min = Collections.min(data2);
+
+		ArrayList<Double> data = (ArrayList<Double>) data2.clone();
+
+		double x;
+		double previous = data.get(0);
+		for (int i = rate; i + rate <= data.size(); i = i + rate) {
+			x = data.get(i);
+			if (previous < 0 && x > 0 || previous > 0 && x < 0) {
+				count++;
+			}
+			previous = x;
+
+		}
+
+		return count;
+	}
+
+	public static double averageResultantAcceleration(ArrayList<Double> xv,
+			ArrayList<Double> yv, ArrayList<Double> zv) {
+		float result = 0;
+		for (int i = 0; i < xv.size(); i++) {
+			double atomicResult = 0;
+			double x = xv.get(i);
+			double y = yv.get(i);
+			double z = zv.get(i);
+
+			x = x * x;
+			y = y * y;
+			z = z * z;
+
+			atomicResult = x + y + z;
+			atomicResult = Math.sqrt(atomicResult);
+			result += atomicResult;
+		}
+
+		return result / xv.size();
+	}
+
+	public static ArrayList<Double> highPassFilter(ArrayList<Double> v) {
+		alpha = 1 - alpha;
+		ArrayList<Double> output = new ArrayList<Double>();
+		output.add(v.get(0));
+		for (int i = 1; i < v.size(); i++) {
+
+			output.add(alpha * output.get(i - 1) + alpha
+					* (v.get(i) - v.get(i - 1)));
+		}
+
+		return output;
+	}
+
+	public static ArrayList<Double> lowPassFilter(ArrayList<Double> v) {
+		ArrayList<Double> output = new ArrayList<Double>();
+
+		output.add(v.get(0));
+		for (int i = 1; i < v.size(); i++) {
+			output.add(alpha * v.get(i) + (1 - alpha) * output.get(i - 1));
+		}
+
+		return output;
+	}
+
+	public static double standardDeviation(ArrayList<Double> arrayList) {
+		DescriptiveStatistics stats = new DescriptiveStatistics();
+
+		// Add the data from the array
+		for (int i = 0; i < arrayList.size(); i++) {
+			stats.addValue(arrayList.get(i));
+		}
+		return stats.getStandardDeviation();
+
+	}
+
+	public static double calculateMean(ArrayList<Double> arrayList) {
+		Double sum = 0.0;
+		for (Double mark : arrayList) {
+			sum += mark;
+		}
+		return sum.doubleValue() / arrayList.size();
+	}
+
+	public static double calculateMeanInt(ArrayList<Integer> arrayList) {
+		Double sum = 0.0;
+		for (Integer mark : arrayList) {
+			sum += mark;
+		}
+		return (sum.doubleValue() / arrayList.size());
+	}
+
+	public static double averageDistanceBetweenPeaks(ArrayList<Double> v) {
+		ArrayList<Integer> distances = new ArrayList<Integer>();
+
+		// /peak detection methodology
+		ArrayList<Integer> maxtab = peakdet(v);
+
+		for (int i = 1; i < maxtab.size(); i++) {
+			distances.add(maxtab.get(i) - maxtab.get(i - 1));
+		}
+
+		return calculateMeanInt(distances);
+
+	}
+
+	public static double roundThreeDecimals(double d) {
+		DecimalFormat threeDForm = new DecimalFormat("#.###");
+		return Double.valueOf(threeDForm.format(d));
 	}
 
 	private static ArrayList<Integer> removeSimilar(ArrayList<Integer> v, int k) {
@@ -31,41 +213,12 @@ public final class FeatureExtractors {
 		}
 		return v;
 	}
-	
-	public static float[] binnedDistribution(ArrayList<Float> v){
-		float [] result = {0,0,0,0,0,0,0,0,0,0,0};
-		
-		float max=Collections.max(v);
-		float min=Collections.min(v);
-		float step=Math.abs(max-min)*0.1f;		
-		float current;
-		int resultIndex;
-		
-		for(Float n : v){
-			current = n;
-			if (current == max) resultIndex = 9;
-			else{
-				current = n - min;
-				current = current / step;
-				resultIndex = (int) current;				
-			}			
-			result[resultIndex] += 1;
-		}
-		
-		for(int i=0;i<result.length;i++){
-			result[i] = result[i] / 512;
-		}
-		
-		return result;
-		
-	}
 
-
-	public static ArrayList<Integer> peakIndices(ArrayList<Float> v, float noise) {
+	public static ArrayList<Integer> peakdet(ArrayList<Double> v) {
 		ArrayList<Integer> peakIndices = new ArrayList<Integer>();
-		float max = Collections.max(v);		
-		float cutoff = max * 0.85f;
-		int iterations=0;
+		double max = Collections.max(v);
+		double cutoff = max * 0.85;
+		int iterations = 0;
 		while (peakIndices.size() < 3 && iterations < 40) {
 			for (int i = 0; i < v.size(); i++) {
 				if (v.get(i) > cutoff) {
@@ -79,9 +232,9 @@ public final class FeatureExtractors {
 			cutoff -= 0.05f;
 			iterations++;
 		}
-		if(peakIndices.size() > 1){
+		if (peakIndices.size() > 1) {
 			peakIndices = removeSimilar(peakIndices, 8);
-		}else{
+		} else {
 			peakIndices.add(0);
 			peakIndices.add(0);
 			peakIndices.add(0);
@@ -90,177 +243,115 @@ public final class FeatureExtractors {
 
 	}
 
-	public static float averageDifference(ArrayList<Integer> v) {
-		int previous = v.get(0);
-		int current;
-		int difference = 0;
-		for (int i = 1; i < v.size(); i++) {
-			current = v.get(i);
-			difference = difference + (current - previous);
-			previous = current;
-		}
-		return (difference / v.size());
-	}
+	public static ArrayList<Integer> peakdet2(ArrayList<Double> v) {
+		double delta = (Collections.max(v) - Collections.min(v)) * 0.5;
+		ArrayList<Integer> maxtab = new ArrayList<Integer>();
+		ArrayList<Integer> mintab = new ArrayList<Integer>();
 
-	public static float averageResultantAcceleration(ArrayList<Float> xv,
-			ArrayList<Float> yv, ArrayList<Float> zv) {
-		float result = 0;
-		for (int i = 0; i < xv.size(); i++) {
-			double atomicResult = 0;
-			float x = xv.get(i);
-			float y = yv.get(i);
-			float z = zv.get(i);
+		double mn = 10000;
+		double mx = -10000;
 
-			x = x * x;
-			y = y * y;
-			z = z * z;
+		int mnpos = 0;
+		int mxpos = 0;
 
-			atomicResult = x + y + z;
-			atomicResult = Math.sqrt(atomicResult);
-			result += atomicResult;
-		}
+		boolean lookformax = true;
 
-		return result / xv.size();
-	}
-
-	// /FFT
-
-	public static ArrayList<Float> iterativeFFT(ArrayList<Float> v, int dir) {
-		int n = v.size();
-		// ArrayList<Complex> bitRevCopy = new ArrayList<Complex>();
-		ArrayList<Complex> bitRevCopy = bitReverseCopy(v, n);
-
-		double upperLoopBound = Math.log(n) / Math.log(2);
-
-		for (int s = 1; s <= upperLoopBound; s++) {
-			int m = (int) Math.pow(2, s);
-			Complex Wm = (new Complex(0, 2 * Math.PI / m)).exp();
-			Complex dirMod = new Complex(1, 0);
-			if (dir == -1) {
-				Wm = new Complex(1, 0).divides(Wm);
-				dirMod = new Complex(2, 0);
+		for (int i = 0; i < v.size(); i++) {
+			double d = v.get(i);
+			if (d > mx) {
+				mx = d;
+				mxpos = i;
 			}
-			for (int k = 0; k < n; k += m) {
-				Complex w = new Complex(1, 0);
-				for (int i = 0; i < m / 2; i++) {
-					Complex t = w.times(bitRevCopy.get(k + i + m / 2));
-					Complex u = bitRevCopy.get(k + i);
-					bitRevCopy.set(k + 1, (u.plus(t)).divides(dirMod));
-					bitRevCopy.set(k + i + m / 2, (u.minus(t)).divides(dirMod));
-					w = w.times(Wm);
+			if (d < mn) {
+				mn = d;
+				mnpos = i;
+			}
+
+			if (lookformax) {
+				if (d < mx - delta) {
+					maxtab.add(mxpos);
+					mn = d;
+					mnpos = i;
+					lookformax = false;
+				}
+			} else {
+				if (d > mn + delta) {
+					mintab.add(i);
+					mx = d;
+					mxpos = i;
+					lookformax = true;
 				}
 			}
 		}
-
-		return toReal(bitRevCopy);
+		return maxtab;
 	}
 
-	public static ArrayList<Float> toReal(ArrayList<Complex> input) {
-		ArrayList<Float> output = new ArrayList<Float>();
-		for (Complex n : input) {
-			output.add(Float.valueOf((float) n.abs()));
-		}
-		return output;
-	}
+	public static ArrayList<Integer> peakdetN(ArrayList<Double> v) {
+		ArrayList<Integer> maxtab = new ArrayList<Integer>();
+		double avg = calculateMean(v);
+		double sd = standardDeviation(v);
 
-	public static ArrayList<Complex> bitReverseCopy(ArrayList<Float> v, int n) {
-		ArrayList<Complex> bitRevCopy = new ArrayList<Complex>();
-		Complex zero = new Complex(0, 0);
-		while (bitRevCopy.size() < 512)
-			bitRevCopy.add(zero);
-
-		double maxbits = Math.log(n) / Math.log(2);
-
-		if (((int) maxbits) - maxbits != 0) {
-			return null;
-		}
-
-		for (int i = 0; i < n; i++) {
-			bitRevCopy.set(revBits(i, (int) maxbits), new Complex(v.get(i), 0));
-		}
-
-		return bitRevCopy;
-	}
-
-	public static int revBits(int n, int size) {
-		int result = 0;
-
-		for (int i = size; i != 0; --i) {
-			result = result << 1;
-			if ((n & 1) != 0) {
-				result = result | 1;
-			}
-			n = n >>> 1;
-		}
-		return result;
-	}
-
-	// END OF FFT
-
-	public static int zeroCrossingCount(ArrayList<Float> data2, float zero,
-			float spread, int rate) {
-		int count = 0;
-
-		float max = Collections.max(data2);
-		float min = Collections.min(data2);
-				
-		ArrayList<Float> data = (ArrayList<Float>) data2.clone();
-
-		float x;
-		float previous = data.get(0);
-		for (int i = rate; i + rate <= data.size(); i = i + rate) {
-			x = data.get(i);
-			if (previous < zero && x > zero || previous > zero && x < zero ) {
-				count++;
-			}
-			previous = x;
-
-		}
-
-		return count;
-	}
-
-	public static float standardDeviation(ArrayList<Float> v) {
-		DescriptiveStatistics stats = new DescriptiveStatistics();
-
-		// Add the data from the array
 		for (int i = 0; i < v.size(); i++) {
-			stats.addValue(v.get(i));
+			double val = v.get(i);
+			if ((val - avg) >= sd) {
+				maxtab.add(i);
+			}
 		}
-		return (float) stats.getStandardDeviation();
-
+		return maxtab;
 	}
 
-	public static float average(ArrayList<Float> v) {
-		Float sum = 0f;
-		for (Float number : v) {
-			sum += number;
-		}
-		return sum / v.size();
-	}
+	public static AccFeat calculateFeatures(AccData a) {
+		AccFeat temp = new AccFeat();
+		ArrayList<Double> xData = a.getxData();
+		ArrayList<Double> yData = a.getyData();
+		ArrayList<Double> zData = a.getzData();
 
-	public static ArrayList<Float> lowPassFilter(ArrayList<Float> v, float alpha) {
-		ArrayList<Float> output = new ArrayList<Float>();
+		ArrayList<Double> lpfxData = FeatureExtractors.lowPassFilter(xData);
+		ArrayList<Double> lpfyData = FeatureExtractors.lowPassFilter(yData);
+		ArrayList<Double> lpfzData = FeatureExtractors.lowPassFilter(zData);
 
-		output.add(v.get(0));
-		for (int i = 1; i < v.size(); i++) {
-			output.add(alpha * v.get(i) + (1 - alpha) * output.get(i - 1));
-		}
+		temp.setMean(0, FeatureExtractors.calculateMean(xData));
+		temp.setMean(1, FeatureExtractors.calculateMean(yData));
+		temp.setMean(2, FeatureExtractors.calculateMean(zData));
 
-		return output;
-	}
+		temp.setSd(0, FeatureExtractors.standardDeviation(xData));
+		temp.setSd(1, FeatureExtractors.standardDeviation(yData));
+		temp.setSd(2, FeatureExtractors.standardDeviation(zData));
 
-	public static ArrayList<Float> highPassFilter(ArrayList<Float> v,
-			float alpha) {
-		alpha = 1-alpha;
-		ArrayList<Float> output = new ArrayList<Float>();
-		output.add(v.get(0));
-		for (int i = 1; i < v.size(); i++) {
+		//
 
-			output.add(alpha * output.get(i-1) + alpha * (v.get(i) - v.get(i-1)));
-		}
+		temp.setAvPeakDistance(0,
+				FeatureExtractors.averageDistanceBetweenPeaks(lpfxData));
+		temp.setAvPeakDistance(1,
+				FeatureExtractors.averageDistanceBetweenPeaks(lpfyData));
+		temp.setAvPeakDistance(2,
+				FeatureExtractors.averageDistanceBetweenPeaks(lpfzData));
 
-		return output;
+		temp.setResultantAcc(FeatureExtractors.averageResultantAcceleration(
+				a.getxData(), a.getyData(), a.getzData()));
+
+		temp.setFftHistogram(0, FeatureExtractors.calcHistogram(
+				FeatureExtractors.fftest(xData), 0, 100, 10));
+		temp.setFftHistogram(1, FeatureExtractors.calcHistogram(
+				FeatureExtractors.fftest(yData), 0, 100, 10));
+		temp.setFftHistogram(2, FeatureExtractors.calcHistogram(
+				FeatureExtractors.fftest(zData), 0, 100, 10));
+
+		temp.setHistogram(0,
+				FeatureExtractors.calcHistogram(xData, -15, 15, 10));
+		temp.setHistogram(1,
+				FeatureExtractors.calcHistogram(yData, -15, 15, 10));
+		temp.setHistogram(2,
+				FeatureExtractors.calcHistogram(zData, -15, 15, 10));
+
+		temp.setCrossingCount(0, FeatureExtractors
+				.zeroCrossingCount(FeatureExtractors.highPassFilter(lpfxData)));
+		temp.setCrossingCount(1, FeatureExtractors
+				.zeroCrossingCount(FeatureExtractors.highPassFilter(lpfyData)));
+		temp.setCrossingCount(2, FeatureExtractors
+				.zeroCrossingCount(FeatureExtractors.highPassFilter(lpfzData)));
+
+		return temp;
 	}
 
 }

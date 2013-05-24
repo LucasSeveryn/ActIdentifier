@@ -94,7 +94,27 @@
         android:layout_below="@+id/xyzPlot"
         android:onClick="saveActivity"
         android:text="Save" />
+    
+        <Button
+            android:id="@+id/classify"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/saveButton"
+            android:layout_alignRight="@+id/xyzPlot"
+            android:layout_below="@+id/saveButton"
+            android:onClick="classifyActivity"
+            android:text="Classify" />
 
+            
+        <Button
+            android:id="@+id/classify"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/saveButton"
+            android:layout_alignRight="@+id/xyzPlot"
+            android:layout_below="@+id/classify"
+            android:onClick="send"
+            android:text="Send" />
     <Spinner
         android:id="@+id/typeSpinner"
         android:layout_width="wrap_content"

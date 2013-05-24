@@ -3,12 +3,6 @@ package com.severyn.actidentifier;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Locale;
@@ -16,7 +10,6 @@ import java.util.Locale;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -24,8 +17,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONStringer;
-
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
 import android.content.Context;
@@ -47,8 +38,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,31 +50,29 @@ import com.severyn.actidentifier.R;
 public class MainActivity extends FragmentActivity implements
 		ActionBar.TabListener, CompoundButton.OnCheckedChangeListener,
 		TextWatcher {
-	private SensorManager mSensorManager;
-	private Sensor mAccelerometer;
+	// Cloud variables
 	private String apiKey = "Ix7evhXTw3uwk1gDHCvzz-uMNEhOy8ZN";
 
+	// Classifiers
+	NaiveGaussianClassifier ng;
+
+	// Sensor Variables
+	private SensorManager mSensorManager;
+	private Sensor mAccelerometer;
 	private double samplingRate = 40; // Hz
 	int sensorDelayMicroseconds = (int) (Math
 			.round(((1 / this.samplingRate) * 1000000.0)));
 
+	// UI
 	SectionsPagerAdapter mSectionsPagerAdapter;
-	/**
-	 * The {@link ViewPager} that will host the section contents.
-	 */
 	ViewPager mViewPager;
 	private boolean recordingEnabled = false;
-
-	float[] averageNoise = { 0, 0, 0 };
-
 	boolean showfft;
-
 	int purgeCounter = 0;
-
 	int displayType = 0;
 
 	private AccActivity tempActivity;
-
+	float[] averageNoise = { 0, 0, 0 };
 	private int index = 0;
 
 	private SimpleXYSeries xPlotSeries = new SimpleXYSeries("x acceleration");
@@ -93,6 +80,7 @@ public class MainActivity extends FragmentActivity implements
 	private SimpleXYSeries zPlotSeries = new SimpleXYSeries("z acceleration");
 
 	AccData recordedData;
+
 	AccData monitorPlotData = new AccData();
 
 	static ArrayList<AccActivity> activityLibrary;
@@ -114,9 +102,9 @@ public class MainActivity extends FragmentActivity implements
 		public void onSensorChanged(SensorEvent event) {
 
 			if (monitorTab != null) {
-				float x = event.values[0];
-				float y = event.values[1];
-				float z = event.values[2];
+				double x = event.values[0];
+				double y = event.values[1];
+				double z = event.values[2];
 				if (recordingEnabled) {
 					recordedData.addX(x);
 					recordedData.addY(y);
@@ -134,13 +122,7 @@ public class MainActivity extends FragmentActivity implements
 						monitorTab.zPlot, z);
 
 				if (monitorPlotData.getxData().size() == 119) {
-					float[] newAverageNoise = {
-							FeatureExtractors.average(monitorPlotData
-									.getxData()),
-							FeatureExtractors.average(monitorPlotData
-									.getyData()),
-							FeatureExtractors.average(monitorPlotData
-									.getzData()) };
+					float[] newAverageNoise = { 0, 0, 0 };
 					averageNoise = newAverageNoise;
 				}
 
@@ -391,17 +373,18 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-	public void loadEntropyFromCloud(String arrayName) {
+	public void loadEntropyFromCloud() {
 		String apiURI = null;
-		try {
-			apiURI = "https://api.mongolab.com/api/1/databases/activity_recognition/collections/entropy_data?f="
-					+ URLEncoder.encode("{\"" + arrayName + "\": 1}", "UTF-8")
-					+ "&l=1" 
-					+ "&apiKey=" + apiKey;
-		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		// try {
+		apiURI = "https://api.mongolab.com/api/1/databases/activity_recognition/collections/entropy_data"
+				// + "?f="
+				// + URLEncoder.encode("{\"" + arrayName + "\": 1}", "UTF-8")
+				// + "&l=1"
+				+ "?apiKey=" + apiKey;
+		// } catch (UnsupportedEncodingException e1) {
+		// TODO Auto-generated catch block
+		// e1.printStackTrace();
+		// }
 
 		Log.d("****Status Line***", "" + apiURI);
 
@@ -462,42 +445,89 @@ public class MainActivity extends FragmentActivity implements
 	}
 
 	public void getEntropyData(View view) {
-		loadEntropyFromCloud("mean0");
+		loadEntropyFromCloud();
 	}
+	
 
-	protected ArrayList<Double> writeEntropyData(String result) {
+	protected void writeEntropyData(String result) {
 		recognitionTab.updateStatusText(result, false);
 		JSONArray jsonArray;
 		try {
 			jsonArray = new JSONArray(result);
-			JSONObject obj = (JSONObject) jsonArray.get(0);
 			
-			Iterator<?> keys = obj.keys();
-
-
-			ArrayList<Double> dataArrayList = new ArrayList<Double>();
+		   
 			
-	        while( keys.hasNext() ){
-	            String key = (String)keys.next();
-	            if( (key.startsWith("mean") || key.startsWith("var") )){
-	            	if(key.equals("mean0")){
-	            		JSONArray dataArray = obj.getJSONArray(key); 
-	            		for(int i=0;i<dataArray.length();i++){
-	            			JSONObject arrayEntry = (JSONObject)dataArray.get(i);
-	            			dataArrayList.add(arrayEntry.getDouble(Integer.toString(i)));
-	            		}
-	            	}
-	            }
-	        }
-	        
-	        return dataArrayList; 
+			ArrayList<ArrayList<Double>> entropyMean = new ArrayList<ArrayList<Double>>();
+			ArrayList<ArrayList<Double>> entropyVar = new ArrayList<ArrayList<Double>>();
+			ArrayList<Double> filler = new ArrayList<Double>();
+			
+			 for (int i = 0; i < 9; i++) {
+			        entropyMean.add(filler);
+			        entropyVar.add(filler);
+			 }
+			
+			
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject obj = (JSONObject) jsonArray.get(i);
+				Iterator<?> keys = obj.keys();
+				while (keys.hasNext()) {
+					String key = (String) keys.next();
+					if (key.startsWith("mean")) {
+						ArrayList<Double> tempArray = new ArrayList<Double>();
+						JSONArray dataArray = obj.getJSONArray(key);
+						for (int j = 0; j < dataArray.length(); j++) {
+							JSONObject arrayEntry = (JSONObject) dataArray
+									.get(j);
+							tempArray.add(arrayEntry.getDouble(Integer
+													.toString(j)));
+						}
+						entropyMean
+						.set((Integer.valueOf(key.substring(key
+								.length() - 1))),tempArray);
+					} else if (key.startsWith("var")) {
+						ArrayList<Double> tempArray = new ArrayList<Double>();
+
+						JSONArray dataArray = obj.getJSONArray(key);
+						for (int j = 0; j < dataArray.length(); j++) {
+							JSONObject arrayEntry = (JSONObject) dataArray
+									.get(j);
+							tempArray.add(arrayEntry.getDouble(Integer
+													.toString(j)));
+						}
+						entropyVar
+						.set((Integer.valueOf(key.substring(key
+								.length() - 1))),tempArray);
+					}
+
+				}
+
+			}
+			ng = new NaiveGaussianClassifier(entropyMean, entropyVar);
 
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
 
+	}
+
+	public ArrayList<Double> getEntropyDataFromJSON(String dataType,
+			JSONObject obj) throws JSONException {
+		ArrayList<Double> dataArrayList = new ArrayList<Double>();
+		Iterator<?> keys = obj.keys();
+		while (keys.hasNext()) {
+			String key = (String) keys.next();
+			if (key.equals(dataType)) {
+				JSONArray dataArray = obj.getJSONArray(key);
+				for (int i = 0; i < dataArray.length(); i++) {
+					JSONObject arrayEntry = (JSONObject) dataArray.get(i);
+					dataArrayList
+							.add(arrayEntry.getDouble(Integer.toString(i)));
+				}
+
+			}
+		}
+		return dataArrayList;
 	}
 
 	public void send(View view) {
@@ -520,7 +550,7 @@ public class MainActivity extends FragmentActivity implements
 			JsonElement jsonElement = gson.toJsonTree(tempActivity.getData());
 			jsonElement.getAsJsonObject().add("gyro", gyroReadings);
 			jsonElement.getAsJsonObject()
-					.addProperty("type", tempActivity.type);
+					.addProperty("type",9);
 
 			String json = gson.toJson(jsonElement);
 			StringEntity entity = new StringEntity(json);
@@ -690,6 +720,17 @@ public class MainActivity extends FragmentActivity implements
 
 	}
 
+	public void println(String string) {
+		Toast.makeText(this, string, Toast.LENGTH_SHORT).show();
+	}
+
+	public void classifyActivity(View view) {
+		AccFeat tempFeat = FeatureExtractors.calculateFeatures(tempActivity
+				.getData());
+		println(Double.toString(tempFeat.getResultantAcc()));
+		recognitionTab.updateStatusText(ng.classify(tempFeat), false);
+	}
+
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 		if (isChecked) {
@@ -716,7 +757,6 @@ public class MainActivity extends FragmentActivity implements
 	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
 		if (arg0.length() > 0) {
 			tempActivity.setRate(Integer.parseInt(arg0.toString()));
-			tempActivity.recalculate();
 			recordingTab.updateActivityDetailText(tempActivity);
 			Toast.makeText(this, "Rate changed to:" + tempActivity.getRate(),
 					Toast.LENGTH_SHORT).show();

@@ -46,9 +46,9 @@ public class ActRecordingFragment extends Fragment {
 	public void drawData(AccData data, int lowerBound, int upperBound,
 			int upperXBound) {
 
-		ArrayList<Float> xDataRecording = data.getxData();
-		ArrayList<Float> yDataRecording = data.getyData();
-		ArrayList<Float> zDataRecording = data.getzData();
+		ArrayList<Double> xDataRecording = data.getxData();
+		ArrayList<Double> yDataRecording = data.getyData();
+		ArrayList<Double> zDataRecording = data.getzData();
 
 		xPlotSeries.setModel(xDataRecording,
 				SimpleXYSeries.ArrayFormat.Y_VALS_ONLY);

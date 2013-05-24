@@ -30,7 +30,7 @@ public class AccMonitorFragment extends Fragment {
 	XYPlot yPlot;
 	XYPlot zPlot;
 
-	public void updatePlot(ArrayList<Float> dataHistory, SimpleXYSeries series, XYPlot plot, Float value){
+	public void updatePlot(ArrayList<Double> dataHistory, SimpleXYSeries series, XYPlot plot, Double value){
 		if (dataHistory.size() < 120) {
 			dataHistory.add(value);
 		} else {

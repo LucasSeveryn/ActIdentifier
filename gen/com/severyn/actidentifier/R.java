@@ -29,20 +29,21 @@ public final class R {
     }
     public static final class id {
         public static final int accActivityDetailText=0x7f090010;
-        public static final int action_settings=0x7f090017;
-        public static final int displaySpinner=0x7f090014;
+        public static final int action_settings=0x7f090018;
+        public static final int classify=0x7f090013;
+        public static final int displaySpinner=0x7f090015;
         public static final int editText=0x7f09000d;
         public static final int fftButton=0x7f09000c;
         public static final int loadEntropyData=0x7f090007;
         public static final int nextAccActivityButton=0x7f090011;
-        public static final int pager=0x7f090015;
+        public static final int pager=0x7f090016;
         public static final int previousAccActivityButton=0x7f09000e;
         public static final int recalculateErrorButton=0x7f090006;
         public static final int saveButton=0x7f090012;
-        public static final int section_label=0x7f090016;
+        public static final int section_label=0x7f090017;
         public static final int startRecordingButton=0x7f09000f;
         public static final int statusText=0x7f09000a;
-        public static final int typeSpinner=0x7f090013;
+        public static final int typeSpinner=0x7f090014;
         public static final int xAccPlot=0x7f090001;
         public static final int xAccPlotLabel=0x7f090000;
         public static final int xyzActivityPlotLabel=0x7f090008;
