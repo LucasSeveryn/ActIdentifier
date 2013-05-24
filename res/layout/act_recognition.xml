@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+        <Button
+        android:id="@+id/loadEntropyData"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Load entropy data"
+        android:textColor="@android:color/black" 
+        android:onClick="getEntropyData"/>
+
+        <TextView
+        android:id="@+id/xyzActivityPlotLabel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Activity data:"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@android:color/black" 
+        android:layout_below="@id/loadEntropyData" />
+        
+        
+        <com.androidplot.xy.XYPlot
+        android:id="@+id/xyzPlot"
+        android:layout_width="fill_parent"
+        android:layout_height="240dp"
+        android:layout_below="@id/loadEntropyData" />
+        
+        <TextView
+        android:id="@+id/statusText"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Saved data:"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@android:color/black" 
+        android:layout_below="@id/xyzPlot" />
+        
+</RelativeLayout>

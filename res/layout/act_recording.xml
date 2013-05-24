@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingTop="5dp" >
+
+    <TextView
+        android:id="@+id/xyzPlotLabel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Recorded Data:"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@android:color/black" />
+
+    <com.androidplot.xy.XYPlot
+        android:id="@+id/xyzPlot"
+        android:layout_width="fill_parent"
+        android:layout_height="240dp"
+        android:layout_below="@id/xAccPlotLabel" />
+
+    <!--
+         <TextView
+        android:id="@+id/zeroCrossingRateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/saveButton"
+        android:text="crossingRate"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    
+    
+        <TextView
+        android:id="@+id/maximumDisplacementText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/saveButton"
+        android:text="minMax"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    -->
+
+    <Button
+        android:id="@+id/fftButton"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/editText"
+        android:layout_toLeftOf="@+id/previousAccActivityButton"
+        android:onClick="applyFourier"
+        android:text="FFT" />
+
+    <Button
+        android:id="@+id/previousAccActivityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:onClick="previousAccActivity"
+        android:text="Prev" />
+
+    <Button
+        android:id="@+id/startRecordingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/xyzPlot"
+        android:onClick="startRecording"
+        android:text="Rec." />
+
+    <TextView
+        android:id="@+id/accActivityDetailText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/startRecordingButton"
+        android:layout_below="@+id/startRecordingButton"
+        android:text="Activity Details"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <Button
+        android:id="@+id/nextAccActivityButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/saveButton"
+        android:onClick="nextAccActivity"
+        android:text="Next >" />
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/xyzPlot"
+        android:layout_below="@+id/xyzPlot"
+        android:onClick="saveActivity"
+        android:text="Save" />
+
+    <Spinner
+        android:id="@+id/typeSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/accActivityDetailText"
+        android:layout_alignTop="@+id/saveButton"
+        android:layout_toLeftOf="@+id/saveButton"
+        android:layout_toRightOf="@+id/startRecordingButton"
+        android:ems="10"
+        android:entries="@array/actTypeArray"
+        android:inputType="number"
+        android:text="1" />
+
+    <Spinner
+        android:id="@+id/displaySpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/typeSpinner"
+        android:layout_alignParentBottom="true"
+        android:layout_alignTop="@+id/nextAccActivityButton"
+        android:layout_toLeftOf="@+id/nextAccActivityButton"
+        android:entries="@array/displayType" />
+    
+</RelativeLayout>

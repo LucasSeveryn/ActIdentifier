@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp"
+    android:paddingTop="5dp" >
+
+    <TextView
+        android:id="@+id/xAccPlotLabel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="x-plane Acceleration plot"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@android:color/black" />
+
+    <com.androidplot.xy.XYPlot
+        android:id="@+id/xAccPlot"
+        android:layout_width="fill_parent"
+        android:layout_height="160dp"
+        android:layout_below="@id/xAccPlotLabel" />
+
+    <TextView
+        android:id="@+id/yAccPlotLabel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/xAccPlot"
+        android:text="y-plane Acceleration plot"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@android:color/black" />
+
+    <com.androidplot.xy.XYPlot
+        android:id="@+id/yAccPlot"
+        android:layout_width="fill_parent"
+        android:layout_height="160dp"
+        android:layout_below="@id/yAccPlotLabel" />
+
+    <TextView
+        android:id="@+id/zAccPlotLabel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/yAccPlot"
+        android:text="z-plane Acceleration plot"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@android:color/black" />
+
+    <com.androidplot.xy.XYPlot
+        android:id="@+id/zAccPlot"
+        android:layout_width="fill_parent"
+        android:layout_height="160dp"
+        android:layout_below="@id/zAccPlotLabel" />
+
+    <Button
+        android:id="@+id/recalculateErrorButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/zAccPlot"
+        android:onClick="recalculateError"
+        android:layout_centerHorizontal="true"
+        android:text="Recalculate Error" />
+</RelativeLayout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Activity Identifier</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_section1">Accelerometer Monitoring</string>
+    <string name="title_section2">Activity Recording</string>
+    <string name="title_section3">Activity Recognition</string>
+
+    <string-array name="displayType">
+        <item>Raw Data</item>
+        <item>LPF Data</item>
+        <item>HPF Data</item>
+        <item>BPF Data</item>
+        <item>FFT Data</item>
+    </string-array>
+    <string-array name="actTypeArray">
+        <item>Walking (0)</item>
+        <item>Running (1)</item>
+        <item>Walking up the stairs (2)</item>
+        <item>Walking down the stairs (3)</item>
+        <item>Sitting (4)</item>
+        <item>Standing up (5)</item>
+        <item>Jumping (6)</item>
+        <item>Test: Wave Sideways (7)</item>
+        <item>Test: Wave Forward (8)</item>
+        <item>Test: Unknown (9)</item>
+        
+        
+    </string-array>
+
+</resources>
