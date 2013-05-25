@@ -36,6 +36,7 @@ import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -111,8 +112,13 @@ public class MainActivity extends FragmentActivity implements
 					recordedData.addZ(z);
 				}
 				if (recordedData != null && recordedData.size() > 511) {
-					recordingEnabled = false;
-					finishRecording();
+					//recordingEnabled = false;
+					//finishRecording();
+					Pair <Integer,String> classification = ng.classify(FeatureExtractors.calculateFeatures(recordedData));
+					recognitionTab.updateStatusText(classification.second,false);
+					recognitionTab.updateStatusText2(FeatureExtractors.getType(classification.first), true);
+					recordedData = new AccData();
+					
 				}
 				monitorTab.updatePlot(monitorPlotData.getxData(), xPlotSeries,
 						monitorTab.xPlot, x);
@@ -236,10 +242,10 @@ public class MainActivity extends FragmentActivity implements
 			v.vibrate(100);
 			pause(500);
 			recordingEnabled = true;
-			t = System.currentTimeMillis();
-			pause(13000);
-			recordingEnabled = false;
-			v.vibrate(100);
+//			t = System.currentTimeMillis();
+//			pause(13000);
+//			recordingEnabled = false;
+//			v.vibrate(100);
 		}
 	}
 
@@ -728,7 +734,7 @@ public class MainActivity extends FragmentActivity implements
 		AccFeat tempFeat = FeatureExtractors.calculateFeatures(tempActivity
 				.getData());
 		println(Double.toString(tempFeat.getResultantAcc()));
-		recognitionTab.updateStatusText(ng.classify(tempFeat), false);
+		recognitionTab.updateStatusText(ng.classify(tempFeat).second, false);
 	}
 
 	@Override
