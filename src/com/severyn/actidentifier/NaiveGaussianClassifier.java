@@ -1,6 +1,8 @@
 package com.severyn.actidentifier;
 import java.util.ArrayList;
 
+import android.util.Pair;
+
 
 public class NaiveGaussianClassifier {
 	ArrayList<ArrayList<Double>> entropyMean;
@@ -14,7 +16,7 @@ public class NaiveGaussianClassifier {
         
 	}
 
-	public String classify(AccFeat q) {
+	public Pair<Integer,String> classify(AccFeat q) {
 		String txt="";
 		txt+=("\n- Starting NBC Classification");
 		double[] results = new double[9];
@@ -82,7 +84,8 @@ public class NaiveGaussianClassifier {
 		}
 		txt+="\n- This is an activity of type #" + maxindex;
 		
-		return txt;
+		Pair pair = new Pair<Integer, String>(maxindex, txt);
+		return pair;
 
 	}
 	
