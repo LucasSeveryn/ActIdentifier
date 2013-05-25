@@ -18,6 +18,35 @@ public final class FeatureExtractors {
 		// Exists only to defeat instantiation.
 	}
 
+	public static String getType(int type) {
+		switch (type) {
+		case 0:
+			return "Walking (0)";
+		case 1:
+			return "Running (1)";
+		case 2:
+			return "Walking up the stairs (2)";
+		case 3:
+			return "Walking down the stairs (3)";
+		case 4:
+			return "Sitting (4)";
+		case 5:
+			return "Standing up (5)";
+		case 6:
+			return "Jumping (6)";
+		case 7:
+			return "Test: Wave Sideways (7)";
+		case 8:
+			return "Test: Wave Forward (8)";
+		case 9:
+			return "Test: Unidentified (9)";
+		default:
+			return "Unspecified";
+
+		}
+
+	}
+	
 	public static double[] fftest(ArrayList<Double> v) {
 		// ArrayList<Double> result = new ArrayList<>();
 		DoubleFFT_1D fftDo = new DoubleFFT_1D(v.size());
