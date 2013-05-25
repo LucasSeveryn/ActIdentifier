@@ -47,5 +47,18 @@ public class ActRecognitionFragment extends Fragment {
 		statusText.setText(text);
 
 	}
+	
+	public void updateStatusText2(String text, boolean append) {
+		TextView statusText = (TextView) this.getView().findViewById(
+				R.id.statusText2);
+		if(append){
+//			String existing = 
+			statusText.setText(statusText.getText().toString() + " " + text);
+		}else{
+			statusText.setText(text);
+		}
+		
+
+	}
 
 }
